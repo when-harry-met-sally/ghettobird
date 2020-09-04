@@ -1,34 +1,42 @@
 from pprint import pprint
 from lxml import html
-import requests
 import json
 from helpers import getTree
 
-def structureGenerator(tree, sample):
+def methodA(tree, sample):
     keys = sample.keys()
-    diagnosis = {}
+    pprint(keys)
+    routine = {}
     for field in keys:
-        element = tree.xpath('//*[contains(text(),"{}")]'.format(sample[field]))[0]
+        x = '//*[(text() = "{}")]'.format(sample[field])
+        elements = tree.xpath(x)
+        if len(elements) == 0:
+            print("field '{}' not found".format(field))
+            return None
+        element = elements[0]
         tag = element.tag
         className = element.get('class')
         xpath = "//{}[@class='{}']".format(tag, className)
-        diagnosis[field] = {
+        routine[field] = {
             "xpath": xpath
         }
-    return diagnosis
+    return routine
 
-url = "https://de.indeed.com/cmp/Getyourguide/jobs"
+# sample = {
+#     "url": "https://de.indeed.com/cmp/Getyourguide/jobs", 
+#     "fields": {
+#         "jobtitle": "Connectivity Operations Team Manager",
+#         "location": "Berlin"
+#     }
+# }
 
-sample = {
-        "jobtitle": "Senior Backend Engineer, Data Products",
-        "dataposted": "vor 6 Tagen"
-    }
+def generateRoutine(sample):
+    url = sample["url"]
+    tree = getTree(url)
+    routine = methodA(tree, sample["fields"])
+    return routine
 
-tree = getTree(url)
-structure = structureGenerator(tree, sample)
 
-pprint(structure)
-
-with open('generated.json', 'w') as outfile:
-    json.dump(structure, outfile)
+# with open('generated.json', 'w') as outfile:
+#     json.dump(structure, outfile)
 
