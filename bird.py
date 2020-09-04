@@ -1,14 +1,20 @@
 from pprint import pprint
 from lxml import html
 import requests
-import re
-
+from datetime import datetime
+import json
 #idea one
 #library that assists in scraping, does try catch shit for you, iterates for you
 
 #idea two
 #library that finds convenient xpath for you
 #arg1 = item in list you are trying to scrape, arg2 = item in list you are trying to scrape, num of items 
+log = []
+def errorLog(source, message):
+    now = datetime.now() 
+    time = now.strftime("%H:%M:%S, %m/%d/%Y")
+    log.append([time, source, message])
+    print(time + " | " + source + " | " + message)
 
 def getTree(URL):
     headers = {
@@ -27,11 +33,13 @@ def getTree(URL):
 #transform functions
 def getText(element):
     return element.text
+def getHref(element):
+    return element.get("href")
 #----------------------
 
-def getCouplings(tree, structure):
+def methodA(tree, structure):
     couplings = [] 
-    lengths = 0 #the amount of entries on the page.
+    count = None #the amount of entries on the page.
     keys = structure.keys() #fields: jobtitle, dateposted
 
     #grabs an array of elements for each field in the structure object.
@@ -41,35 +49,36 @@ def getCouplings(tree, structure):
         try:
             elements = tree.xpath(structure[field]["xpath"])
             structure[field]["elements"] = elements
-            lengths = len(elements)
+            length = len(elements)
+            if count == None:
+                count = length
+            else:
+                if length != count:
+                    print ("error - number of elements differ per item.")
         except:
-            print(field + " not found.")
+            errorLog("getCoupling()", "error - " + field + " not found.") #do this shit tomorrow
         
     #arrays of elements are iterated through and transformed
-    for l in range(0, lengths):
+    for l in range(0, count):
         obj = {}
         for field in keys:
-            obj[field] = structure[field]["transform"](structure[field]["elements"][l])
+            if "transform" in structure[field].keys():
+                obj[field] = structure[field]["transform"](structure[field]["elements"][l])
+            else:
+                obj[field] = structure[field]["elements"][l].text #a lack of a transformative function simply takes text
         couplings.append(obj)
     
     return couplings
 
-    
+
 url = "https://de.indeed.com/cmp/Getyourguide/jobs"
 
 #this has the name of the field you are interested in, an xpath to find the element on the page, and a function that allows you to grab the data and transform it (see getText())
-structure = {
-    "jobtitle": {
-        "xpath": "//div[@class='cmp-JobListItem-title']",
-        "transform": getText,
-    },
-    "dateposted": {
-        "xpath": "//div[@class='cmp-JobListItem-timeTag']",
-        "transform": getText,
-    }
-}
+structure = {}
+with open('generated.json') as f:
+  structure = json.load(f)
+
 
 tree = getTree(url)
-couplings = getCouplings(tree, structure)
-pprint(couplings)
-
+data = methodA(tree, structure)
+pprint(data)
