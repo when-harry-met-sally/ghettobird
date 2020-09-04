@@ -24,44 +24,52 @@ def getTree(URL):
     except:
         return None
 
+#transform functions
 def getText(element):
     return element.text
+#----------------------
 
+def getCouplings(tree, structure):
+    couplings = [] 
+    lengths = 0 #the amount of entries on the page.
+    keys = structure.keys() #fields: jobtitle, dateposted
+
+    #grabs an array of elements for each field in the structure object.
+    #jobtitle is given an array of all jobtitle elements
+    #dateposted is given an array fo all datepoted elements
+    for field in keys:
+        try:
+            elements = tree.xpath(structure[field]["xpath"])
+            structure[field]["elements"] = elements
+            lengths = len(elements)
+        except:
+            print(field + " not found.")
+        
+    #arrays of elements are iterated through and transformed
+    for l in range(0, lengths):
+        obj = {}
+        for field in keys:
+            obj[field] = structure[field]["transform"](structure[field]["elements"][l])
+        couplings.append(obj)
+    
+    return couplings
+
+    
+url = "https://de.indeed.com/cmp/Getyourguide/jobs"
+
+#this has the name of the field you are interested in, an xpath to find the element on the page, and a function that allows you to grab the data and transform it (see getText())
 structure = {
     "jobtitle": {
         "xpath": "//div[@class='cmp-JobListItem-title']",
         "transform": getText,
     },
-    "time": {
+    "dateposted": {
         "xpath": "//div[@class='cmp-JobListItem-timeTag']",
         "transform": getText,
     }
 }
 
-def main():
-    def getCouplings(structure):
-        couplings = []
-        length = []
-        keys = structure.keys()
-        for field in keys:
-            try:
-                elements = tree.xpath(structure[field]["xpath"])
-                structure[field]["elements"] = elements
-                length = len(elements)
-            except:
-                print(field + " not found.")
-        for l in range(0, length):
-            obj = {}
-            for field in keys:
-                obj[field] = structure[field]["transform"](structure[field]["elements"][l])
-            couplings.append(obj)
-        pprint(couplings)
+tree = getTree(url)
+couplings = getCouplings(tree, structure)
+pprint(couplings)
 
-    url = "https://de.indeed.com/cmp/Getyourguide/jobs"
-    tree = getTree(url)
-    getCouplings(structure)
-
-    
-
-
-main()
