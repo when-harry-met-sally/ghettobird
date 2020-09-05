@@ -67,12 +67,15 @@ def C(routine):
 def B(routine):
     tree = getTree(routine["url"])
     roadmap = routine["structure"]
-    data = explore({}, [tree], roadmap)
-    pprint(data)
+    data = explore({}, [tree], roadmap, 0, None)
+    return list(data.values())
 
-def explore(data, tree, roadmap):
+def explore(data, tree, roadmap, depth, root):
     items = roadmap.items()
     for branch in tree:
+        if depth == 1:
+            root = branch
+            data[root] = {}
         fields = {}
         for item in items:
             key = item[0]
@@ -80,13 +83,16 @@ def explore(data, tree, roadmap):
             if key == "value":
                 return True
             leaf = branch.xpath(key)
-            valueFound = explore(data, leaf, obj)
+            valueFound = explore(data, leaf, obj, depth + 1, root)
             if valueFound == True:
                 element = branch.xpath(key)
                 transformer = obj["transformer"]
                 value = transformer(element[0])
                 fields[obj["value"]] = value
-                data[branch] = fields
+                if depth == 1:
+                    data[root] = {**data[root], **fields}
+                if depth > 1:
+                   data[root] = {**data[root], **fields}
     return data
     
     

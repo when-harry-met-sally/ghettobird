@@ -9,7 +9,7 @@ def getHref(element):
     return element.get("href")
 
  #scrapes an indeed company
-routineA = {
+roadmapA = {
     "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
     "method": {
         "type": A,
@@ -27,7 +27,7 @@ routineA = {
 }
 
 #scrapes a glassdoor company
-routineC = {
+roadmapC = {
     "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
     "method": {
         "type": C,
@@ -41,7 +41,7 @@ routineC = {
     }
 }
 
-routineB = {
+roadmapB = {
     "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
     "method": {
         "type": B,
@@ -52,15 +52,21 @@ routineB = {
                 "value": "jobtitle",
                 "transformer": getText
             },
-            ".//div[@class='cmp-JobListItem-subtitle']": {
+             ".//div[@class='cmp-JobListItem-subtitle']": {
                 "value": "location",
                 "transformer": getText
+            },
+            ".//div[@class='cmp-JobListItem-tags']": {
+                ".//div[@class='cmp-JobListItem-timeTag']": {
+                    "value": "time",
+                    "transformer": getText
+                }
             }
         }
      }
 }
 
-result = run(routineB)
+result = run(roadmapB)
 pprint(result)
 
 
