@@ -3,7 +3,7 @@ from helpers import getTree
 import json
 import time
 #scrapes elements based off of field selectors
-def A(browser, routine):
+def A(routine):
     tree = getTree(routine["url"])
     structure = routine["structure"]
     data = [] 
@@ -37,7 +37,7 @@ def A(browser, routine):
     return data
 
 #scrapes fields through a script in the header
-def C(browser, routine):
+def C(routine):
     tree = getTree(routine["url"])
     head = routine["method"]["head"]
     tail = routine["method"]["tail"]
@@ -91,7 +91,7 @@ def B(routine):
         return data
     browser = routine["method"]["browser"]
     browser.get(routine["url"])
-    time.sleep(5)  
+    time.sleep(routine["method"]["sleep"])  
     tree = browser.find_element_by_xpath("//body")
     roadmap = routine["structure"]
     data = explore({}, [tree], roadmap, 0, None)

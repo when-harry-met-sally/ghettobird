@@ -78,7 +78,8 @@ roadmapBselenium = {
     "url": "https://de.indeed.com/cmp/Hellofresh/jobs?jk=22c38db700e6b578&start=0&clearPrefilter=1",
     "method": {
         "type": B,
-        "browser": browser
+        "browser": browser,
+        "sleep": 2
     },
     "structure": {
         "//div[@class='cmp-JobDetail']": {
