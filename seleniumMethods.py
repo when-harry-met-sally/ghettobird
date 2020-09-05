@@ -1,10 +1,9 @@
-def getText(element):
-    return element.text
-def getHref(element):
-    return element.get("href")
-
+from pprint import pprint
+from helpers import getTree
+import json
+import time
 #scrapes elements based off of field selectors
-def A(routine):
+def A(browser, routine):
     tree = getTree(routine["url"])
     structure = routine["structure"]
     data = [] 
@@ -38,7 +37,7 @@ def A(routine):
     return data
 
 #scrapes fields through a script in the header
-def C(routine):
+def C(browser, routine):
     tree = getTree(routine["url"])
     head = routine["method"]["head"]
     tail = routine["method"]["tail"]
@@ -63,37 +62,41 @@ def C(routine):
             data[field] = routine["structure"][field]["transformer"](route)
         else:
             data[field] = route
-    return data        
-    
- #scrapes an indeed company
-routine1 = {
-    "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
-    "method": {
-        "type": A,
-    },
-    "structure": {
-        "jobtitle": {
-            "path": "//div[@class='cmp-JobListItem-title']",
-            "transformer": getText, #optional
-        },
-        "dateposted": {
-            "path": "//div[@class='cmp-JobListItem-timeTag']",
-            "transformer": getText #optional,
-        }
-    }
-}
+    return data 
 
-#scrapes a glassdoor company
-routineC = {
-    "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
-    "method": {
-        "type": C,
-        "head": "window._initialData=JSON.parse('",
-        "tail": "');"
-        },
-    "structure": {
-        "jobtitle": {
-            "path": ["route", "pathname"]
-        },
-    }
-}
+def B(routine):
+    def explore(data, tree, roadmap, depth, root):
+        items = roadmap.items()
+        for branch in tree:
+            if depth == 1:
+                root = branch
+                data[root] = {}
+            fields = {}
+            for item in items:
+                key = item[0]
+                obj = item[1]
+                if key == "value":
+                    return True
+                leaf = branch.find_elements_by_xpath(key)
+                valueFound = explore(data, leaf, obj, depth + 1, root)
+                if valueFound == True:
+                    element = branch.find_elements_by_xpath(key)
+                    transformer = obj["transformer"]
+                    value = transformer(element[0])
+                    fields[obj["value"]] = value
+                    if depth == 1:
+                        data[root] = {**data[root], **fields}
+                    if depth > 1:
+                        data[root] = {**data[root], **fields}
+        return data
+    browser = routine["method"]["browser"]
+    browser.get(routine["url"])
+    time.sleep(5)  
+    tree = browser.find_element_by_xpath("//body")
+    roadmap = routine["structure"]
+    data = explore({}, [tree], roadmap, 0, None)
+    return list(data.values())
+
+
+    
+    

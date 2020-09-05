@@ -1,7 +1,11 @@
 from ghettobird import run
 from generate import generateRoutine
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+
 from pprint import pprint
-from methods import A, B, C
+from seleniumMethods import A, B, C
 
 def getText(element):
     return element.text
@@ -41,6 +45,7 @@ roadmapC = {
     }
 }
 
+#scrapes indeed just like roadmapA
 roadmapB = {
     "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
     "method": {
@@ -66,7 +71,30 @@ roadmapB = {
      }
 }
 
-result = run(roadmapB)
+chromedriver_location = 'c:/chromedriver.exe'
+browser = webdriver.Chrome(executable_path=chromedriver_location)
+
+roadmapBselenium = {
+    "url": "https://de.indeed.com/cmp/Hellofresh/jobs?jk=22c38db700e6b578&start=0&clearPrefilter=1",
+    "method": {
+        "type": B,
+        "browser": browser
+    },
+    "structure": {
+        "//div[@class='cmp-JobDetail']": {
+            ".//div[@class='cmp-JobDetailTitle']": {
+                "value": "jobtitle",
+                "transformer": getText
+            },
+            ".//div[@class='cmp-JobDetailDescription-description']": {
+                "value": "jobdesc",
+                "transformer": getText
+            },
+        }
+     }
+}
+
+result = run(roadmapBselenium)
 pprint(result)
 
 
