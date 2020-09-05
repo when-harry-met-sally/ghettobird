@@ -72,20 +72,25 @@ def B(routine):
     # print(a[1].xpath(".//div[@class='cmp-JobListItem-title']")[0].text)
 
     roadmap = routine["structure"]
-    data = explore({}, tree, roadmap)
+    data = explore({}, [tree], roadmap)
     pprint(data)
 
 def explore(data, tree, roadmap):
-    print(tree)
     items = roadmap.items()
-    print(tree)
-    for item in items:
-        key = item[0]
-        obj = item[1]
-        if key == "value":
-            return True
-        t = tree.xpath(key)
-        valueFound = explore(data, t, obj)
-        if valueFound == True:
-            element = tree.xpath(key)
-            pprint(element)
+    new = {}
+    print('recursing')
+    for branch in tree:
+        for item in items:
+            key = item[0]
+            obj = item[1]
+            if key == "value":
+                return True
+            leaf = branch.xpath(key)
+            valueFound = explore(data, leaf, obj)
+            if valueFound == True:
+                element = branch.xpath(key)
+                transformer = obj["transformer"]
+                value = transformer(element[0])
+                new[obj["value"]] = value
+                print(new)
+    
