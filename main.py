@@ -1,14 +1,15 @@
-from consume import run
+from ghettobird import run
 from generate import generateRoutine
 from pprint import pprint
-from methods import A, C
+from methods import A, B, C
 
 def getText(element):
     return element.text
 def getHref(element):
     return element.get("href")
 
-routine1 = { #scrapes an indeed company for job titles and days posted
+ #scrapes an indeed company
+routineA = {
     "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
     "method": {
         "type": A,
@@ -25,6 +26,7 @@ routine1 = { #scrapes an indeed company for job titles and days posted
     }
 }
 
+#scrapes a glassdoor company
 routineC = {
     "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
     "method": {
@@ -39,11 +41,26 @@ routineC = {
     }
 }
 
-#sample for indeed
+routineB = {
+    "url": "https://de.indeed.com/cmp/Getyourguide/jobs",
+    "method": {
+        "type": B,
+    },
+    "structure": {
+        "//a[@class='cmp-JobListItem-anchor']": {
+            ".//div[@class='cmp-JobListItem-title']": {
+                "value": "jobtitle",
+                "transformer": getText
+            },
+            ".//div[@class='cmp-JobListItem-subtitle']": {
+                "value": "location",
+                "transformer": getText
+            }
+        }
+     }
+}
 
-
-result = run(routine1)
+result = run(routineB)
 pprint(result)
 
-# pprint(result)
 

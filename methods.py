@@ -2,6 +2,7 @@ from pprint import pprint
 from helpers import getTree
 import json
 
+#scrapes elements based off of field selectors
 def A(routine):
     tree = getTree(routine["url"])
     structure = routine["structure"]
@@ -34,7 +35,8 @@ def A(routine):
         data.append(obj)
     
     return data
-    
+
+#scrapes fields through a script in the header
 def C(routine):
     tree = getTree(routine["url"])
     head = routine["method"]["head"]
@@ -60,4 +62,30 @@ def C(routine):
             data[field] = routine["structure"][field]["transformer"](route)
         else:
             data[field] = route
-    return data        
+    return data 
+
+def B(routine):
+    tree = getTree(routine["url"])
+
+    # a = tree.xpath("//a[@class='cmp-JobListItem-anchor']")
+    # print(a)
+    # print(a[1].xpath(".//div[@class='cmp-JobListItem-title']")[0].text)
+
+    roadmap = routine["structure"]
+    data = explore({}, tree, roadmap)
+    pprint(data)
+
+def explore(data, tree, roadmap):
+    print(tree)
+    items = roadmap.items()
+    print(tree)
+    for item in items:
+        key = item[0]
+        obj = item[1]
+        if key == "value":
+            return True
+        t = tree.xpath(key)
+        valueFound = explore(data, t, obj)
+        if valueFound == True:
+            element = tree.xpath(key)
+            pprint(element)
