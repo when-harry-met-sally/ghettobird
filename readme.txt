@@ -1,181 +1,142 @@
-Ghettobird Scraping Framework
+Ghettobird Scraping Framework/Tool
 -----------------------------
-The goal of this framework is to:
+The goal of this project is to:
+   - reduce scrapers down into a single JSON object, with a few auxilary functions
+
+By doing this we can:
    - reduce the amount of boilerplate code in scraping projects.
-     this includes try/catch blocks and reoccuring patterns
    - make scrapers readable
    - group fragile code together for easy maintenance
+   - reduce inconsistancies in error handling
 
-I hope to do this by:
-
-   - reducing the scraper to a dictionary of xpaths, and auxilary functions
-
-And as a bonus,
+Bonus:
  
-   - if the structure of scrapers can be simplified, develope a method for those
-     unfamiliar with xpaths to generate the generate the dictionary structure 
-     with a little user input
+   - if the structure of scrapers can be simplified, we can automate the generation
+     of scrapers
 
-I don't know much about IP rotation, networking, or security. That will come later...
+This tool does not yet include:
+   - IP rotation, networking, or security
+
+Why?
+   - Unethical, but more importantly, I know nothing about it
 
 ---------------------------------------------------------------------------------
-Ghettobird dictionary structure:
+The Ghettobird Dictionary/JSON
 
-Reserved keywords: "path, transformer, args, scope"
+Reserved keywords: "path", "transformer", "args, "iterate"
 
-This summary will focus on the ROADMAP, which will guide the scraper to our desired data
+This summary will focus on the FLIGHTPATH, which will guide the scraper to our desired data, and provide intructions when it encounters its data
 
-The structure of the roadmap will be preserved with the exception of paths and transformer functions, which will be replaced with our desired values
+The structure of the FLIGHTPATH is preserved when results are yielded, with the exception of "paths" and "transformer" functions, which will be replaced with our desired values
+
+Sample tranformer function:
 
 def TRANSFORM_get_value(element):
-    return element.get("value")
+    return element.get("text")
 
 "url": "http://ghettobird.sample.s3-website.us-east-2.amazonaws.com",
-"roadmap": {
-    "job_title": {
-        "path": "//input[@id='what']"
+"flightpath": {
+    "header": {
+        "path": "//*[@class='page-header']",
         "transformer": TRANSFORM_get_value
     }
 }
 
-Assuming nothing goes wrong, the result will be ----------->
+The result ------------------------->
 
-"roadmap": {
-    "job_title": "Douglas Parfümerie"
+"flightpath": {
+    "job_title": "Jobs in St. Louis, Missouri"
 }
 
-An element is selected with xpathsm and TRANSFORM function will generally grab the data, and often times transform it. We are selecting a input in this case, so it is 
-necessary to grab "value".
+--------------------------------------
 
-A plain old div would require:
+An element is selected by xpaths and TRANSFORM function generally grabs the data, and/or modifies the data after. 
 
-def TRANSFORM_get_text(element):
-    return element.get("text)
-
-However, in the absence of a transform function, element.get("text) will always be called. Meaning that a transform function would be necessary for an input field,
-but not necessary if you are just grabbing text from a div, span or p tag.
+However, in the absence of a transform function, element.get("text) will always be called. Meaning that a transform function would be necessary for something 
+like an input field. But is not generally necessary if you are just grabbing plain text from a DIV, SPAN or P tag.
 
 Similiarly, the "path" field in a dictionary is not always needed.
 
 Example:
 
-"roadmap": {
-    "id_tech_jobsopen": {
-         "path": "//div[@id='searchCountPages']",
+"flightpath": {
+    "salary_range": {
+         "path": "//*[@id='salary-query']",
          "transformer": TRANSFORM_get_text
     },
 }
 
 Because the transformer function can be dropped in this situation, and "path" would be the only key within our "id_tech_jobsopen" object, we can actually remove both keys:
 
-"roadmap: {
-    "id_tech_jobsopen": "//div[@id='searchCountPages']"
+"flightpath: {
+    "salary_range": "//*[@id='salary-query']",
 }
 
-Combined --->
+The result ------------------------->
 
-"roadmap": {
-    "id_tech_jobsopen": "//div[@id='searchCountPages']",
-    "job_title": {
-        "path": "//input[@id='what']"
-        "transformer": TRANSFORM_get_value
-    }
+"flightpath": {
+    "salary_range":  "Salary Range: 10,000 - 100,000"
 }
 
+--------------------------------------
 
-Both of these fields will only return the first element that matches the give xpath.
-A field must be wrapped in an array to return multiple values.
+Values that are objects {} or strings, will find only the first element that matches a given xpath. 
 
-Example:
+Wrapping a dictionary value in an array, will find all results matching the xpath.
 
-"roadmap": {
-    "id_tech_jobsopen": ["//div[@id='searchCountPages']"],
-    "job_title": [{
-        "path": "//input[@id='what']"
-        "transformer": TRANSFORM_get_value
-    }]
+"flightpath": {
+    "job_titles": ["//*[@class='title']"],
 }
 
-This would return an array for both entries.
+The result ------------------------->
+
+"flightpath": {
+    "job_titles": ["Senior Software Dev", "Agile Coach", "Software Engineer", "Junior Software Dev", "Ping Pong Player"]
+}
+
+-------------------------------------
+
+It is often necessary to couple/group fields.
+
+"flightpath": {
+    "job_titles": ["//*[@class='title']"],
+    "job_descriptions": ["//*[@class='description']"],
+}
+
+This flightpath would return two arrays, but there would be nothing binding a title to its associated description.
+
+To do this, we must use the "iterate" keyword.
 
 Coupling fields: 
 
 "jobs": [{
-             "scope": "//div[@data-tn-component='organicJob']",
-             "title": {
-                "path": ".//a[@data-tn-element='jobTitle']",
-             },
-            "link": {
-                "path": ".//a[@data-tn-element='jobTitle']",
-                "transformer": getHref
-             },
-             "dateposted": {
-                "path": ".//span[@class='date ']"
-             },
-            "location": {
-                "path": ".//span[@class='location accessible-contrast-color-location']",
-             }
+             "iterate": "//div[@class='job']",
+             "title": ".//*[@class='title']",
+             "description": ".//*[@class='description']",
          }],
 
-Notice this is a dictionary within an array. If we removed the brackets (the list), each field "title", "link", "datepoted" and "location", would all return one value.
-We would be left with a dictionary, with these 4 fields, all describing the first job out of many.
+Notice that we have an array of objects. The keyword "iterate" is necessary. As is the period that precedes the xpath. 
 
-The most important field here is "scope", it's a reserved keyword. It narrows the cope of the xpaths that follow. 
+Iterate will loop through all divs with the class of "job", and then try to find elements with xpaths of tittle, and description. 
 
-Assume there are 10 elements that contain details about 10 jobs. The scope xpath ensures we iterate through each container, and the the four fields from within the container.
-This way our result ends with a list of job objects with unique details...
+The result ------------------------->
 
-[{
-    "title": Software dev,
-    "link": www.google.com,
-    "datepoted": yesterday,
-    "location": STL,
+"flightpath": {
+    jobs: [{
+        "title": "Senior Software Dev",
+        "description": "Need a master of React Native, a man or woman with gumption, who can lead a team."
+    },
     {
-    "title": Agile coach,
-    "link": www.google.com,
-    "datepoted": today,
-    "location": antarctica
-    }, ...
-}]
+        "title": "Agile Coach",
+        "description": "Need a trained agility coach who can combat followers of the waterfall method. Zealotry required."
+    },
+    ...]
+}
 
-(NOTE: I think the scope attribute is a bit inconsistant, could use a change)
+(4 more entries would follow)
 
------------------------------------------------------------------------------------------
-My plan for the roadmap generator is as follows:
+-------------------------------------
 
-A user enters in a desired output given a URL: 
-
-That could be:
-
-[
-    "company": "GOOGLE",
-    {
-    "title": Software dev,
-    "link": www.google.com,
-    "datepoted": yesterday,
-    "location": STL,
-}.{
-    "title": Agile coach,
-    "link": www.google.com,
-    "datepoted": today,
-    "location": antarctica
-    }, ...
-}]
-
-
-And we reverse engineer our way to a roadmap structure that can be applied to all URLS following that sturcture. Array notation or dictionary notation is important here.
-
-For single values that we except to occur once on the page. 
-
-We use an xpath that searches for matching text, we then analyze css selectors and id, to find out if there is a unique identifier that only returns that element.
-
-For object arrays, it is a bit tricker.
-
-We start from the first value of the first entry, we go to the parent node to parent node until we have a node that is ap arent of all fields within the dictionary, but not
-including the second item's members. We then grab css selectors and or id. 
-
------SELENIUM ISSUE----
-The function used needs to accomodate fo rselenium and regular xpaths.
 
 
 
