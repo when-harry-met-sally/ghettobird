@@ -1,9 +1,6 @@
-from pprint import pprint
-from helpers import getTree
-import json
-import time
 from lxml import html
 import requests
+import copy
 
 def getTree(URL):
     headers = {
@@ -20,133 +17,91 @@ def getTree(URL):
         print(e)
         return None
 
-def run(routine):
+def getText(element):
+    return element.text
+def getHref(element):
+    return element.get("href")
+def getValue(element):
+    return element.get("value")
+
+def master_method(flight):
+    def explore(tree, flightpath, log):
+        flightpathCopy = copy.deepcopy(flightpath)
+        keys = flightpathCopy.keys()
+        for key in keys:
+            obj = flightpathCopy[key]
+            typeOfObj = type(obj)
+            if typeOfObj == dict:
+                innerKeys = obj.keys()
+                if "path" in innerKeys:
+                    element = None
+                    try:
+                        element = tree.xpath(obj["path"])[0]
+                    except Exception as e: 
+                        log.append("{} | {} element not found.".format(e, key))
+                        flightpathCopy[key] = ""
+                        continue
+                    try:
+                        if "transformer" in innerKeys:
+                            flightpathCopy[key] = obj["transformer"](element)
+                        else:
+                            flightpathCopy[key] = getText(element)
+                    except Exception as e: 
+                        log.append("{} | {} transformer function failed.".format(e, key))
+                        print(e)
+                else:
+                    flightpathCopy[key] = explore(tree, obj, log)
+            if typeOfObj == list:
+                profile = {}
+                try:
+                    profile = obj[0]
+                except Exception as e: 
+                    log.append("{} | {} list is empty.".format(e, key))
+                    flightpathCopy[key] = []
+                    continue
+                typeOfProfile = type(profile)
+                if typeOfProfile == dict:
+                    iterate = "//html"
+                    branch = None
+                    if "iterate" in profile.keys():
+                        iterate = profile.pop("iterate")
+                    branches = tree.xpath(iterate)
+                    if len(branches) == 0:
+                        log.append("{} container element for list not found".format(key))
+                        flightpathCopy[key] = []
+                        continue
+                    leaves = []
+                    for branch in branches:
+                        leaves.append(explore(branch, profile, log))
+                    flightpathCopy[key] = leaves
+                    continue
+                leaves = []
+                if typeOfProfile == str:
+                    try:
+                        elements = tree.xpath(profile)
+                    except Exception as e: 
+                        log.append("{} | {} is an invalid xpath".format(e, key))
+                        leaves = []
+                        continue
+                    for element in elements:
+                        leaves.append(getText(element))
+                flightpathCopy[key] = leaves
+            if typeOfObj == str:
+                try:
+                    element = tree.xpath(obj)[0]
+                    flightpathCopy[key] = getText(element)
+                except Exception as e:
+                    log.append("{} | {} not found".format(e, key))
+                    flightpathCopy[key] = ""
+                    continue
+
+        return flightpathCopy
+
+    tree = getTree(flight["url"])
+    results = explore(tree, flight["flightpath"], flight["log"])
+    return results
+
+def fly(routine):
     routine["log"] = []
-    routine["results"] = routine["method"]["type"](routine)
+    routine["results"] = master_method(routine)
     return routine
-
-#scrapes elements based off of field selectors
-def basic_method_A(routine):
-    tree = getTree(routine["url"])
-    structure = routine["structure"]
-    data = [] 
-    count = None 
-    keys = structure.keys()
-
-    for field in keys:
-        try:
-            elements = tree.xpath(structure[field]["path"])
-            structure[field]["elements"] = elements
-            length = len(elements)
-            if count == None:
-                count = length
-            else:
-                if length != count:
-                    print ("error - number of elements differ per item.")
-                    return None
-        except Exception as e:
-            print(e)
-            return None
-
-    for l in range(0, count):
-        obj = {}
-        for field in keys:
-            if "transformer" in structure[field].keys():
-                obj[field] = structure[field]["transformer"](structure[field]["elements"][l])
-            else:
-                obj[field] = structure[field]["elements"][l].text 
-        data.append(obj)
-    
-    return data
-
-def basic_method_B(routine):
-    def explore(data, tree, roadmap, depth, root):
-        items = roadmap.items()
-        for branch in tree:
-            if depth == 1:
-                root = branch
-                data[root] = {}
-            fields = {}
-            for item in items:
-                key = item[0]
-                obj = item[1]
-                if key == "value":
-                    return True
-                leaf = branch.xpath(key)
-                valueFound = explore(data, leaf, obj, depth + 1, root)
-                if valueFound == True:
-                    element = branch.xpath(key)
-                    transformer = obj["transformer"]
-                    value = transformer(element[0])
-                    fields[obj["value"]] = value
-                    if depth == 1:
-                        data[root] = {**data[root], **fields}
-                    if depth > 1:
-                        data[root] = {**data[root], **fields}
-        return data
-        
-    tree = getTree(routine["url"])
-    roadmap = routine["structure"]
-    data = explore({}, [tree], roadmap, 0, None)
-    return list(data.values())
-
-#scrapes fields through a script in the header
-def basic_method_C(routine):
-    tree = getTree(routine["url"])
-    head = routine["method"]["head"]
-    tail = routine["method"]["tail"]
-    keys = routine["structure"].keys()
-    stolenScript = {}
-    scripts = tree.xpath('//script')
-    data = {}
-    for script in scripts:
-        raw = script.text
-        if head in str(raw):
-            raw = raw.split(head)[1]
-            raw = raw.split(tail)[0]
-            encoded = raw.encode('utf-8')
-            stolenScript = json.loads(encoded, strict=False)
-            break
-    for field in keys:
-        path = routine["structure"][field]["path"]
-        route = stolenScript
-        for p in path:
-            route = route[p]
-        if "transformer" in routine["structure"][field].keys():
-            data[field] = routine["structure"][field]["transformer"](route)
-        else:
-            data[field] = route
-    return data 
-
-def selenium_method_B(routine):
-    def explore(data, tree, roadmap, depth, root):
-        items = roadmap.items()
-        for branch in tree:
-            if depth == 1:
-                root = branch
-                data[root] = {}
-            fields = {}
-            for item in items:
-                key = item[0]
-                obj = item[1]
-                if key == "value":
-                    return True
-                leaf = branch.find_elements_by_xpath(key)
-                valueFound = explore(data, leaf, obj, depth + 1, root)
-                if valueFound == True:
-                    element = branch.find_elements_by_xpath(key)
-                    transformer = obj["transformer"]
-                    value = transformer(element[0])
-                    fields[obj["value"]] = value
-                    if depth == 1:
-                        data[root] = {**data[root], **fields}
-                    if depth > 1:
-                        data[root] = {**data[root], **fields}
-        return data
-    browser = routine["method"]["browser"]
-    browser.get(routine["url"])
-    time.sleep(routine["method"]["sleep"])  
-    tree = browser.find_element_by_xpath("//body")
-    roadmap = routine["structure"]
-    data = explore({}, [tree], roadmap, 0, None)
-    return list(data.values())
