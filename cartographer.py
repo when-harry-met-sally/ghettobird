@@ -69,7 +69,7 @@ def cartograph(desired):
                 goal[key] = xpath
                 continue
         return goal
-    tree = getTree("https://www.indeed.com/jobs?q=sales&l&vjk=882afa687e67339e")
+    tree = getTree("http://ghettobird.sample.s3-website.us-east-2.amazonaws.com/")
     result = explore(desired, tree)
     print('-------RESULT-------')
     pprint(result)
@@ -88,23 +88,23 @@ def getUniqueXpath(element):
     return xpath
 
 
-# desired = {
-#     "header": "Jobs in St. Louis, Missouri",
-#     "titles": ["Senior Software Dev"],
-#     "jobs": [{
-#         "title": "Senior Software Dev",
-#         "description": "Need a master of React Native, a man or woman with gumption, who can lead a team.",
-#     }]
-# }
-
-
 desired = {
-    "header": "sales jobs",
-    "titles": ["Solar Sales Specialist"],
+    "header": "Jobs in St. Louis, Missouri",
+    "titles": ["Senior Software Dev"],
     "jobs": [{
-        "title": "Solar Sales Specialist",
-        "description": "Bella Villa, MO",
+        "title": "Senior Software Dev",
+        "description": "Need a master of React Native, a man or woman with gumption, who can lead a team.",
     }]
 }
+
+
+# desired = {
+#     "header": "sales jobs",
+#     "titles": ["Solar Sales Specialist"],
+#     "jobs": [{
+#         "title": "Solar Sales Specialist",
+#         "description": "Bella Villa, MO",
+#     }]
+# }
 
 cartograph(desired)
