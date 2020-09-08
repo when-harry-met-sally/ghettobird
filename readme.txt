@@ -17,8 +17,8 @@ Bonus:
 This tool does not yet include:
    - IP rotation, networking, or security
 
-Why?
-   - Unethical, but more importantly, I know nothing about it
+    Why?
+        - Unethical, but more importantly, I know nothing about it
 
 ---------------------------------------------------------------------------------
 The Ghettobird Dictionary/JSON
