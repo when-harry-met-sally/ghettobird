@@ -7,6 +7,7 @@ routine = {
         "jobs": [{
             "iterate": "//div[@class='job']",
             "title": ".//h4[@class='title']",
+            "description": ".//h4[@class='description']",
             "dateposted": ".//div[@data-element-type='date']",
             "salary": "//h3[@id='salary-query']",
         }]
@@ -14,3 +15,4 @@ routine = {
 }
 
 fly(routine)
+print(routine["results"])
