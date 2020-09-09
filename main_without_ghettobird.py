@@ -33,8 +33,7 @@ def scrape():
             "salary": container.xpath("//h3[@id='salary-query']")[0].text
         }
         data["jobs"].append(job)
-
-    print(data)
+        
 scrape()
 
 #Key differences

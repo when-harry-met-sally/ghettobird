@@ -8,7 +8,6 @@ def getHref(element):
     return element.get("href")
 def getValue(element):
     return element.get("value")
-
 #for retreiving script jsons rather than elements
 def TRANSFORM_parseJSONfromScript(element, args):
     data = {}

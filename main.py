@@ -14,6 +14,4 @@ routine = {
     },
 }
 
-
 fly(routine)
-print(routine["results"])
