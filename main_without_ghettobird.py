@@ -1,9 +1,6 @@
 from lxml import html
 import requests
 
-#this is what the scraper would look like without ghettobird
-#except ghettobird includes logging and error handling
-
 def getTree(URL):
     headers = {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
@@ -39,3 +36,4 @@ def scrape():
     print(data)
 scrape()
 
+#this script does not do error handling or logging, both included with ghettobird
