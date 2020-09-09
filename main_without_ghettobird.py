@@ -1,3 +1,9 @@
+#---------------FILE OVERVIEW--------------------------------------------
+#this accomplishes the same thing as main.py, but without ghettobird
+#however, this file lacks error handling, and error logging
+#in my opinion, harder to read and mantain
+#-------------------------------------------------------------------------
+
 from lxml import html
 import requests
 
@@ -35,9 +41,3 @@ def scrape():
         data["jobs"].append(job)
         
 scrape()
-
-#Key differences
-#This version is completely without error handling
-#No error logging
-#I find the code harder to understand
-#Maintenance is more difficult

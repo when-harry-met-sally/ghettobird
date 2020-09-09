@@ -1,10 +1,9 @@
 #---------------FILE OVERVIEW----------------------
-#HELPER FUNCTIONS
+#HELPER FUNCTIONS SHARED ACROSS MULTIPLE FILES
 #--------------------------------------------------
 
 from lxml import html
 import requests
-import copy
 
 def getTree(URL):
     headers = {
