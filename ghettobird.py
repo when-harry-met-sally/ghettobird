@@ -9,34 +9,8 @@ def getHref(element):
 def getValue(element):
     return element.get("value")
 
+#for retreiving script jsons rather than elements
 def TRANSFORM_parseJSONfromScript(element, args):
-    #EXAMPLE FLIGHTPATHS
-
-    # routine = {
-    #     "url": "https://www.glassdoor.com/Overview/Working-at-UniGroup-EI_IE3422.11,19.htm",
-    #     "flightpath": {
-    #         "jobs": {
-    #             "path": "//script[@type='application/ld+json']",
-    #             TRANSFORM_parseJSONfromScript: {
-    #                 "jsonPath": ["ratingValue"]
-    #             }
-    #         }
-    #     },
-    # }
-    # routine = {
-    #     "url": "https://de.indeed.com/cmp/Getyourguide", #model URL
-    #     "flightpath": {
-    #         "bio": {
-    #             "path": "//script[contains(text(), 'window._initialData=JSON.parse(')]",
-    #             TRANSFORM_parseJSONfromScript: {
-    #                 "head": "window._initialData=JSON.parse('",
-    #                 "tail": "');",
-    #                 "id_company": ["topLocationsAndJobsStory", "companyName"],
-    #                 "id_lessText": ["aboutStory", "aboutDescription", "lessText"]
-    #             },
-    #         }
-    #     }
-    # }
     data = {}
     keys = args.keys()
     raw = element.text
@@ -65,11 +39,10 @@ def TRANSFORM_parseJSONfromScript(element, args):
                 print("{} not found".format(p))
                 route = ""
                 break
-                #needs to error more gracefully, fieldn eeds to be empty, but right now its a clusterfuck
         data[field] = route
     return data
 
-def master_method(flight):
+def basic_method(flight):
     def explore(tree, flightpath, log):
         flightpathCopy = copy.deepcopy(flightpath)
         keys = flightpathCopy.keys()
@@ -152,5 +125,5 @@ def master_method(flight):
 
 def fly(routine):
     routine["log"] = []
-    routine["results"] = master_method(routine)
+    routine["results"] = basic_method(routine)
     return routine

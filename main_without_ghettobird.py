@@ -33,7 +33,12 @@ def scrape():
             "salary": container.xpath("//h3[@id='salary-query']")[0].text
         }
         data["jobs"].append(job)
+
     print(data)
 scrape()
 
-#this script does not do error handling or logging, both included with ghettobird
+#Key differences
+#This version is completely without error handling
+#No error logging
+#I find the code harder to understand
+#Maintenance is more difficult
