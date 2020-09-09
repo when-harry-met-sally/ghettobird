@@ -2,13 +2,13 @@ from helpers import getTree
 import copy
 import json
 
-def getText(element):
+#---------------TRANSFORM FUNCTIONS----------------
+def TRANSFORM_getText(element):
     return element.text
-def getHref(element):
+def TRANSFORM_getHref(element):
     return element.get("href")
-def getValue(element):
+def TRANSFORM_getValue(element):
     return element.get("value")
-#for retreiving script jsons rather than elements
 def TRANSFORM_parseJSONfromScript(element, args):
     data = {}
     keys = args.keys()
@@ -40,7 +40,7 @@ def TRANSFORM_parseJSONfromScript(element, args):
                 break
         data[field] = route
     return data
-
+#---------------NON-SELENIUM METHOD----------------
 def basic_method(flight):
     def explore(tree, flightpath, log):
         flightpathCopy = copy.deepcopy(flightpath)
@@ -66,7 +66,7 @@ def basic_method(flight):
                             elif callable(inner):
                                 flightpathCopy[key] = inner(element, obj[inner])
                             else:
-                                flightpathCopy[key] = getText(element)
+                                flightpathCopy[key] = TRANSFORM_getText(element)
                     except Exception as e: 
                         log.append("{} | {} transformer function failed.".format(e, key))
                         print(e)
@@ -105,12 +105,12 @@ def basic_method(flight):
                         leaves = []
                         continue
                     for element in elements:
-                        leaves.append(getText(element))
+                        leaves.append(TRANSFORM_getText(element))
                 flightpathCopy[key] = leaves
             if typeOfObj == str:
                 try:
                     element = tree.xpath(obj)[0]
-                    flightpathCopy[key] = getText(element)
+                    flightpathCopy[key] = TRANSFORM_getText(element)
                 except Exception as e:
                     log.append("{} | {} not found".format(e, key))
                     flightpathCopy[key] = ""

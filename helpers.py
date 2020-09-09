@@ -1,3 +1,7 @@
+#---------------FILE OVERVIEW----------------------
+#HELPER FUNCTIONS
+#--------------------------------------------------
+
 from lxml import html
 import requests
 import copy
