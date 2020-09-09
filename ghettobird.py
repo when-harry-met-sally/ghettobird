@@ -1,5 +1,6 @@
 from helpers import getTree
 import copy
+import json
 
 def getText(element):
     return element.text
@@ -7,6 +8,66 @@ def getHref(element):
     return element.get("href")
 def getValue(element):
     return element.get("value")
+
+def TRANSFORM_parseJSONfromScript(element, args):
+    #EXAMPLE FLIGHTPATHS
+
+    # routine = {
+    #     "url": "https://www.glassdoor.com/Overview/Working-at-UniGroup-EI_IE3422.11,19.htm",
+    #     "flightpath": {
+    #         "jobs": {
+    #             "path": "//script[@type='application/ld+json']",
+    #             TRANSFORM_parseJSONfromScript: {
+    #                 "jsonPath": ["ratingValue"]
+    #             }
+    #         }
+    #     },
+    # }
+    # routine = {
+    #     "url": "https://de.indeed.com/cmp/Getyourguide", #model URL
+    #     "flightpath": {
+    #         "bio": {
+    #             "path": "//script[contains(text(), 'window._initialData=JSON.parse(')]",
+    #             TRANSFORM_parseJSONfromScript: {
+    #                 "head": "window._initialData=JSON.parse('",
+    #                 "tail": "');",
+    #                 "id_company": ["topLocationsAndJobsStory", "companyName"],
+    #                 "id_lessText": ["aboutStory", "aboutDescription", "lessText"]
+    #             },
+    #         }
+    #     }
+    # }
+    data = {}
+    keys = args.keys()
+    raw = element.text
+    if "head" in args and "tail" in args:
+        head = args["head"]
+        tail = args["tail"]
+        raw = raw.replace(head, "")
+        raw = raw.replace(tail, "")
+        args.pop("head")
+        args.pop("tail")
+    try:
+        raw = raw.encode('utf-8')
+        raw = json.loads(raw, strict=False)
+    except Exception as e:
+        raw = raw.encode('ascii', 'ignore').decode('unicode_escape')
+        raw = json.loads(raw, strict=False)
+        print("error while encoding json")
+        print(e)
+    for field in keys:
+        path = args[field]
+        route = raw
+        for p in path:
+            if p in route.keys():
+                route = route[p]
+            else:
+                print("{} not found".format(p))
+                route = ""
+                break
+                #needs to error more gracefully, fieldn eeds to be empty, but right now its a clusterfuck
+        data[field] = route
+    return data
 
 def master_method(flight):
     def explore(tree, flightpath, log):
@@ -21,15 +82,19 @@ def master_method(flight):
                     element = None
                     try:
                         element = tree.xpath(obj["path"])[0]
+                        
                     except Exception as e: 
                         log.append("{} | {} element not found.".format(e, key))
                         flightpathCopy[key] = ""
                         continue
                     try:
-                        if "transformer" in innerKeys:
-                            flightpathCopy[key] = obj["transformer"](element)
-                        else:
-                            flightpathCopy[key] = getText(element)
+                        for inner in innerKeys:
+                            if inner == "transformer":
+                                flightpathCopy[key] = obj["transformer"](element)
+                            elif callable(inner):
+                                flightpathCopy[key] = inner(element, obj[inner])
+                            else:
+                                flightpathCopy[key] = getText(element)
                     except Exception as e: 
                         log.append("{} | {} transformer function failed.".format(e, key))
                         print(e)

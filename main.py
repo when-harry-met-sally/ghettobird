@@ -11,8 +11,9 @@ routine = {
             "dateposted": ".//div[@data-element-type='date']",
             "salary": "//h3[@id='salary-query']",
         }]
-    }
+    },
 }
+
 
 fly(routine)
 print(routine["results"])
