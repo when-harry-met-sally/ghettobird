@@ -122,6 +122,13 @@ def basic_method(flight):
     results = explore(tree, flight["flightpath"], flight["log"])
     return results
 
+def captchaCheck(tree, selector):
+    #"Let's do a quick security check"
+    #h1
+    captchaExists = len(tree.xpath(selector)) > 0
+    if captchaExists:
+        input("--Captcha Detected--") 
+
 def fly(routine):
     routine["log"] = []
     routine["results"] = basic_method(routine)

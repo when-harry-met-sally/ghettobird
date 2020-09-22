@@ -8,9 +8,9 @@ scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/aut
 creds = ServiceAccountCredentials.from_json_keyfile_name('creds.json', scope) #requires creds
 client = gspread.authorize(creds)
 
-def writeToSheet(book, sheet, header, data):
+def writeToSheet(book, sheet, header, data, sheet_range):
     if len(data) > 0:
-        sheet_range ="!A1:L10000"
+        #sheet_range ="!A1:L10000"
         client.login()
         book = client.open(book)
         s = book.worksheet(sheet)
