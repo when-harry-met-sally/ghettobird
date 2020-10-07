@@ -1,0 +1,6 @@
+setup.py
+src/ghettobird.py
+src/ghettobird.egg-info/PKG-INFO
+src/ghettobird.egg-info/SOURCES.txt
+src/ghettobird.egg-info/dependency_links.txt
+src/ghettobird.egg-info/top_level.txt

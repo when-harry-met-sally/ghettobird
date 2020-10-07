@@ -123,8 +123,6 @@ def basic_method(flight):
     return results
 
 def captchaCheck(tree, selector):
-    #"Let's do a quick security check"
-    #h1
     captchaExists = len(tree.xpath(selector)) > 0
     if captchaExists:
         input("--Captcha Detected--") 
