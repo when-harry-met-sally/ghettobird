@@ -1,23 +1,25 @@
-from ghettobird import fly, iterate, transformer
+from ghettobird import fly, iterate, transformer, TRANSFORM_parseJSONfromScript
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pprint import pprint
 
-# chromedriver_location = 'c:/chromedriver.exe'
-# browser = webdriver.Chrome(executable_path=chromedriver_location)
+chromedriver_location = 'c:/chromedriver.exe'
+browser = webdriver.Chrome(executable_path=chromedriver_location)
 
 def test(element):
     return "Avocado"
 
 itinerary = {
-    "url": "http://ghettobird.sample.s3-website.us-east-2.amazonaws.com",
-    "flightpath": {
-        "links": {
-            "path": ["//h4[@class='title']"],
-            # transformer: test
-        }
-    },
+            "url": "https://www.glassdoor.com/Overview/Working-at-UniGroup-EI_IE3422.11,19.htm",
+            "flightpath": {
+                "ratings": {
+                    "path": "//script[@type='application/ld+json']",
+                    TRANSFORM_parseJSONfromScript: {
+                        "rating": ["ratingValue"]
+                    }
+                }
+            },
 }
 
 fly(itinerary)
-pprint(itinerary)
+pprint(itinerary["results"])

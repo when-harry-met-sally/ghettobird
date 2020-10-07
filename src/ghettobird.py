@@ -170,6 +170,7 @@ def tree_method(flight):
                     try:
                         element = tree.xpath(obj["path"])[0]
                     except Exception as e: 
+                        print(e)
                         log.append("{} | {} element not found.".format(e, key))
                         flightpathCopy[key] = ""
                         continue
@@ -200,6 +201,8 @@ def tree_method(flight):
                     branch = None
                     if iterate in profile.keys():
                         iterater = profile.pop(iterate)
+                    #add list of objects without iterators that return in list format.
+                    #if a list of objects doesnt have iterate but has path and or transformer, return transformed elements
                     branches = tree.xpath(iterater)
                     if len(branches) == 0:
                         log.append("{} container element for list not found".format(key))
@@ -265,6 +268,7 @@ def fly(routine):
     routine["log"] = []
     handleOptions(routine)
     opts = routine["options"]
+    pprint(options)
     if opts["browser"] is None:
         routine["results"] = tree_method(routine)
     else:
