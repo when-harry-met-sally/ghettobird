@@ -1,7 +1,13 @@
 from helpers import getTree
 import copy
 import json
-
+from pprint import pprint
+#---------------FLIGHT OPTIONS---------------------
+flight_options = {
+    "interrupt_selectors": [], #xpath selectors
+    "interrupt_retries": 3,
+    "browser": None
+}
 #---------------TRANSFORM FUNCTIONS----------------
 def TRANSFORM_getText(element):
     return element.text
@@ -40,8 +46,13 @@ def TRANSFORM_parseJSONfromScript(element, args):
                 break
         data[field] = route
     return data
+#---------------SELENIUM METHOD--------------------
+def selenium_method(flight):                     #-
+    results = []                                 #- Working version exists already, but i'm waiting to develope flight_options before creating a selenium method
+    return results                               #-
 #---------------NON-SELENIUM METHOD----------------
-def basic_method(flight):
+def tree_method(flight):
+    opts = flight["options"]
     def explore(tree, flightpath, log):
         flightpathCopy = copy.deepcopy(flightpath)
         keys = flightpathCopy.keys()
@@ -117,17 +128,43 @@ def basic_method(flight):
                     continue
 
         return flightpathCopy
-
-    tree = getTree(flight["url"])
+    retries = opts["interrupt_retries"]
+    tree = None
+    while retries > -1:
+        tree = getTree(flight["url"])
+        interruptions = interrupt_check(tree, opts["interrupt_selectors"])
+        if interruptions is True:
+            retries = retries - 1
+            input("--Interrupt Selector Detected: Press Any Key to Continue--") 
+            print("--Retries remaining: {}".format(str(retries)))
+            if retries == 0:
+                return []
+        else:
+            break
     results = explore(tree, flight["flightpath"], flight["log"])
     return results
 
-def captchaCheck(tree, selector):
-    captchaExists = len(tree.xpath(selector)) > 0
-    if captchaExists:
-        input("--Captcha Detected--") 
+def interrupt_check(tree, selectors):
+    for selector in selectors:
+        if len(tree.xpath(selector)) > 0:
+            print(selector.format(" detected"))
+            return True
+    return False
 
+def handleOptions(routine):
+    if "options" in list(routine.keys()):
+        opts = routine["options"]
+        for option in list(opts.keys()):
+            flight_options[option] = opts[option] 
+    routine["options"] = flight_options
+    pprint(routine)
+    
 def fly(routine):
     routine["log"] = []
-    routine["results"] = basic_method(routine)
+    handleOptions(routine)
+    opts = routine["options"]
+    if opts["browser"] is None:
+        routine["results"] = tree_method(routine)
+    else:
+        routine["results"] = selenium_method(routine)
     return routine
