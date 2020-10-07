@@ -268,7 +268,6 @@ def fly(routine):
     routine["log"] = []
     handleOptions(routine)
     opts = routine["options"]
-    pprint(options)
     if opts["browser"] is None:
         routine["results"] = tree_method(routine)
     else:
