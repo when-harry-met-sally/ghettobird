@@ -1,3 +1,7 @@
 /*
 /*/
 !/src/
+
+src/__pycache__
+
+src/ghettobird.egg-info
