@@ -2,11 +2,17 @@ from helpers import getTree
 import copy
 import json
 from pprint import pprint
+#---------------DEFAULT OPTIONS--------------------
+def default_alert():
+    print('\007')
+    input("--Interrupt Selector Detected: Press Any Key to Continue--")
 #---------------FLIGHT OPTIONS---------------------
 flight_options = {
-    "interrupt_selectors": [], #xpath selectors
-    "interrupt_retries": 3,
-    "browser": None
+    "interrupt_selectors": [], #takes an array of string xpath selectors
+    "interrupt_retries": 3, #amount of retries taken before giving up and return empty results object
+    "interrupt_alert": default_alert, #alert function triggeredw hen an interrupt selector is found
+    "browser": None, #selenium browser. None-type will cause the basic_tree method function
+    "pause": 0, #time in seconds that sleep after a get request THIS WILLL COME INTO PLAY WITH SELENIUM, NOT SO MUCH THE TREE METHOD
 }
 #---------------TRANSFORM FUNCTIONS----------------
 def TRANSFORM_getText(element):
@@ -135,10 +141,10 @@ def tree_method(flight):
         interruptions = interrupt_check(tree, opts["interrupt_selectors"])
         if interruptions is True:
             retries = retries - 1
-            input("--Interrupt Selector Detected: Press Any Key to Continue--") 
+            opts["interrupt_alert"]()
             print("--Retries remaining: {}".format(str(retries)))
             if retries == 0:
-                return []
+                return {}
         else:
             break
     results = explore(tree, flight["flightpath"], flight["log"])

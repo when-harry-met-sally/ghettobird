@@ -1,4 +1,3 @@
-from pprint import pprint
 from ghettobird import fly
 
 routine = {
@@ -13,11 +12,6 @@ routine = {
             "salary": "//h3[@id='salary-query']",
         }]
     },
-    "options": {
-        "test": "test"
-    }
 }
 
 fly(routine)
-print('-----')
-pprint(routine["results"])
