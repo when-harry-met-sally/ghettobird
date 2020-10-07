@@ -3,6 +3,9 @@ import copy
 import json
 import time
 from pprint import pprint
+#---------------RESERVED KEYWORDS------------------
+iterate = "GB_iterate"
+transformer = "GB_transformer"
 #---------------DEFAULT OPTIONS--------------------
 def default_alert():
     print('\007')
@@ -77,8 +80,8 @@ def selenium_method(flight):                     #-
                         continue
                     try:
                         for inner in innerKeys:
-                            if inner == "transformer":
-                                flightpathCopy[key] = obj["transformer"](element)
+                            if inner == transformer:
+                                flightpathCopy[key] = obj[transformer](element)
                             elif callable(inner):
                                 flightpathCopy[key] = inner(element, obj[inner])
                             else:
@@ -98,11 +101,11 @@ def selenium_method(flight):                     #-
                     continue
                 typeOfProfile = type(profile)
                 if typeOfProfile == dict:
-                    iterate = "//html"
+                    iterater = "//html"
                     branch = None
-                    if "iterate" in profile.keys():
-                        iterate = profile.pop("iterate")
-                    branches = tree.find_elements_by_xpath(iterate)
+                    if iterate in profile.keys():
+                        iterater = profile.pop(iterate)
+                    branches = tree.find_elements_by_xpath(iterater)
                     if len(branches) == 0:
                         log.append("{} container element for list not found".format(key))
                         flightpathCopy[key] = []
@@ -172,8 +175,8 @@ def tree_method(flight):
                         continue
                     try:
                         for inner in innerKeys:
-                            if inner == "transformer":
-                                flightpathCopy[key] = obj["transformer"](element)
+                            if inner == transformer:
+                                flightpathCopy[key] = obj[transformer](element)
                             elif callable(inner):
                                 flightpathCopy[key] = inner(element, obj[inner])
                             else:
@@ -193,11 +196,11 @@ def tree_method(flight):
                     continue
                 typeOfProfile = type(profile)
                 if typeOfProfile == dict:
-                    iterate = "//html"
+                    iterater = "//html"
                     branch = None
-                    if "iterate" in profile.keys():
-                        iterate = profile.pop("iterate")
-                    branches = tree.xpath(iterate)
+                    if iterate in profile.keys():
+                        iterater = profile.pop(iterate)
+                    branches = tree.xpath(iterater)
                     if len(branches) == 0:
                         log.append("{} container element for list not found".format(key))
                         flightpathCopy[key] = []

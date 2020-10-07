@@ -1,4 +1,4 @@
-from ghettobird import fly
+from ghettobird import fly, iterate
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pprint import pprint
@@ -9,12 +9,12 @@ browser = webdriver.Chrome(executable_path=chromedriver_location)
 itinerary = {
     "url": "http://ghettobird.sample.s3-website.us-east-2.amazonaws.com",
     "options": {
-        "browser": browser
+        # "browser": browser
     },
     "flightpath": {
         "header": "//*[@class='page-header']",
         "jobs": [{
-            "iterate": "//div[@class='job']",
+            iterate: "//div[@class='job']",
             "title": ".//h4[@class='title']",
             "description": ".//div[@class='description']",
             "dateposted": ".//div[@data-element-type='date']",

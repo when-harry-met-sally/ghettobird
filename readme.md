@@ -12,25 +12,28 @@ pip install ghettobird
 
 ## Goals
 
-- reduce scrapers down into a single JSON object, with a few auxilary functions
-   - reduce the amount of boilerplate code in scraping projects.
-   - make scrapers readable
-   - group fragile code together for easy maintenance
-   - reduce inconsistancies in error handling
-- automate and hasten the development of scrapers
-- reduce the need for xpaths
+The primary goal for this project is to simplify scraping applications into a single dictionary/JSON object (with a few functions sprinkled in).
+**This allows us to:**
+- Reduce boilerplate code
+- Increase code readability
+- Group fragile pieces of code for easy maintenance 
+- Reduce inconsistancies in error handling
+**Overall:**
+- Automate and hasten the development of scrapers
+
+
 
 ## Usage
 
 ```python
-from ghettobird import fly
+from ghettobird import fly, iterate
 
 itinerary = {
     "url": "http://ghettobird.sample.s3-website.us-east-2.amazonaws.com",
     "flightpath": {
         "header": "//*[@class='page-header']",
         "jobs": [{
-            "iterate": "//div[@class='job']",
+            iterate: "//div[@class='job']",
             "title": ".//h4[@class='title']",
             "description": ".//div[@class='description']",
             "dateposted": ".//div[@data-element-type='date']",
