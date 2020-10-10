@@ -1,6 +1,7 @@
 # ghettobird
 
 A Python framework/tool designed for web scraping.
+(This readme and the tool itself are still under construction.)
 
 ## Installation
 
@@ -70,7 +71,7 @@ By default, elements that are found with a given xpath have their text values re
 ```python
 from ghettobird import fly, transformer
 ```
-```python
+<!-- ```python
 itinerary = {
     "url": "http://ghettobird.sample.s3-website.us-east-2.amazonaws.com",
     "flightpath": {
@@ -116,4 +117,4 @@ We would be returned with dictionary that follows the blueprint we laid out, but
            'title': 'Ping Pong Player'}]}
 
 ```
-
+ -->
