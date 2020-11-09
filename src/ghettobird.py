@@ -4,8 +4,8 @@ import json
 import time
 from pprint import pprint
 #---------------RESERVED KEYWORDS------------------
-iterate = "GB_iterate"
-transformer = "GB_transformer"
+iterate = "@iterate"
+transformer = "@transformer"
 #---------------DEFAULT OPTIONS--------------------
 def default_alert():
     print('\007')

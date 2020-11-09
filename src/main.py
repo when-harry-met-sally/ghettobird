@@ -6,20 +6,23 @@ from pprint import pprint
 chromedriver_location = 'c:/chromedriver.exe'
 browser = webdriver.Chrome(executable_path=chromedriver_location)
 
-def test(element):
-    return "Avocado"
 
 itinerary = {
-            "url": "https://www.glassdoor.com/Overview/Working-at-UniGroup-EI_IE3422.11,19.htm",
-            "flightpath": {
-                "ratings": {
-                    "path": "//script[@type='application/ld+json']",
-                    TRANSFORM_parseJSONfromScript: {
-                        "rating": ["ratingValue"]
-                    }
-                }
-            },
+    "url": "http://ghettobird.sample.s3-website.us-east-2.amazonaws.com/",
+    "flightpath": {
+        "header": "//*[@class='page-header']",
+        "jobs": [
+            {
+                "@iterate": "//div[@class='job']",
+                "title": ".//h4[@class='title']",
+                "description": ".//h4[@class='description']",
+                "dateposted": ".//div[@data-element-type='date']",
+                "salary": "//h3[@id='salary-query']"
+            }
+        ]
+    }
 }
+
 
 fly(itinerary)
 pprint(itinerary["results"])
