@@ -1,4 +1,4 @@
-from helpers import getTree
+from .helpers import getTree
 import copy
 import json
 import time
@@ -273,3 +273,4 @@ def fly(routine):
     else:
         routine["results"] = selenium_method(routine)
     return routine
+
